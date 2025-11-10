@@ -98,7 +98,7 @@ function InstaTeleport(x, y, z, roofcheck, overridespeedup, overridespeeduntil, 
         if not ignorenotify then
             local AeroUtil = require(game:GetService("ReplicatedStorage").Aero.Shared.Util)
             if AeroUtil and AeroUtil.HeistDisplays then
-                local message = "<font color='#FF008F'>Du bist unter einem Roof!</font>"
+                local message = "<font color='#FF008F'>Ignore me</font>"
                 local autoHide = 3
                 AeroUtil.HeistDisplays:ShowHeistInstruction(message, autoHide, math.random(1000,9999))
             end
@@ -125,6 +125,40 @@ function InstaTeleport(x, y, z, roofcheck, overridespeedup, overridespeeduntil, 
     end
 end
 
+local cache = {}
+
+for _, v in next, getgc(true) do
+    if type(v) == "function" then
+        for _, u in next, debug.getupvalues(v) do
+            if type(u) == "table" and rawget(u, "ID") and typeof(u.Seconds) == "number" then
+                table.insert(cache, v)
+                break
+            end
+        end
+    end
+end
+
+local vim = game:GetService("VirtualInputManager")
+
+local function Click(key)
+    vim:SendKeyEvent(true, key, false, game)
+    task.wait()
+    vim:SendKeyEvent(false, key, false, game)
+end
+
+task.spawn(function()
+    while true do
+        for _, func in next, cache do
+            for _, u in next, debug.getupvalues(func) do
+                if type(u) == "table" and rawget(u, "ID") and typeof(u.Seconds) == "number" then
+                    u.Seconds = 1e-30
+                end
+            end
+        end
+        Click(Enum.KeyCode.E)
+        task.wait(0.005)
+    end
+end)
 
 
 --Settings
